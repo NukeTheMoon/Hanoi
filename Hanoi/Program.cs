@@ -10,7 +10,6 @@ namespace Hanoi
         //bądź bohaterem w swoim kodzie
         static void Main(string[] args)
         {
-
         }
     }
 }

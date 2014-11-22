@@ -15,5 +15,26 @@ namespace Hanoi
             Size = size;
             Color = color;
         }
+
+        public override bool Equals(object obj)
+        {
+            var item = obj as Disc;
+ 
+            if (item == null)
+            {
+                return false;
+            }
+
+            if (this.Color == item.Color && this.Size == item.Size) 
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return Size ^ Color.GetHashCode();
+        } 
     }
 }
