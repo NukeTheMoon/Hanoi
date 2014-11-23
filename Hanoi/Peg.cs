@@ -29,6 +29,17 @@ namespace Hanoi
             return false;
         }
 
+        public bool MoveDisc(Peg destination)
+        {
+            Peg originalState = this.Clone();
+            if (destination.PushDisc(Stack.Pop()))
+            {
+                return true;
+            }
+            this.Stack = originalState.Stack;
+            return false;
+        }
+
         public Peg Clone()
         {
             Peg clone = new Peg();

@@ -40,8 +40,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConsolePresenter.cs" />
     <Compile Include="GameState.cs" />
     <Compile Include="Disc.cs" />
+    <Compile Include="GameStateMatch.cs" />
+    <Compile Include="MoveInstruction.cs" />
     <Compile Include="Peg.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
