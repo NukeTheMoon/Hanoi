@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -9,34 +10,42 @@ namespace Hanoi
     {
         public GameState PreviousState;
         public List<GameState> Possibilities;
-        public GameState PreviousPossibility;
 
         public List<Peg> Pegs;
         public string Transition { get; set; }
+        int tier;
        
         public GameState()
         {
             Pegs = new List<Peg>();
             Possibilities = new List<GameState>();
             PreviousState = null;
-            PreviousPossibility = null;
             Transition = "";
+            tier = 0;
         }
 
         public GameState(GameState previous)
         {
             Pegs = previous.Pegs.Select(i => i.Clone()).ToList();
             PreviousState = previous;
-            PreviousPossibility = null;
+            tier = previous.tier + 1;
             Possibilities = new List<GameState>();
             Transition = "";
         }
 
-        public GameState(GameState previous, GameState previousPossibility)
+        public GameState(GameState previous, bool clean)
         {
             Pegs = previous.Pegs.Select(i => i.Clone()).ToList();
-            PreviousState = previous;
-            PreviousPossibility = previousPossibility;
+            if (clean)
+            {
+                PreviousState = null;
+                tier = 0;
+            }
+            else
+            {
+                PreviousState = previous;
+                tier = previous.tier + 1;
+            }
             Possibilities = new List<GameState>();
             Transition = "";
         }
@@ -47,6 +56,16 @@ namespace Hanoi
             {
                 Pegs.Add(new Peg());
             }
+        }
+
+        public List<Disc> GetAllDiscs()
+        {
+            List<Disc> allDiscs = new List<Disc>();
+            for (var i = 0; i < this.Pegs.Count; ++i)
+            {
+                allDiscs.AddRange(this.Pegs.ElementAtOrDefault(i).GetDiscList());
+            }
+            return allDiscs;
         }
 
         public bool SameParametersAs(GameState state)
@@ -122,7 +141,7 @@ namespace Hanoi
                     {
                         if (j != i)
                         {
-                            GameState possibleState = new GameState(this, possibilities.ElementAtOrDefault(possibilities.Count - 1));
+                            GameState possibleState = new GameState(this);
                             if (possibleState.Pegs.ElementAtOrDefault(i).MoveDisc(possibleState.Pegs.ElementAtOrDefault(j)))
                             {
 
@@ -148,7 +167,7 @@ namespace Hanoi
                     {
                         if (j != i)
                         {
-                            GameState possibleState = new GameState(this, possibilities.ElementAtOrDefault(possibilities.Count - 1));
+                            GameState possibleState = new GameState(this);
                             if (possibleState.Pegs.ElementAt(i).MoveDisc(possibleState.Pegs.ElementAt(j)))
                             {
                                 if (!taboo.Any(state => state.HasSamePegs(possibleState)))
@@ -246,108 +265,61 @@ namespace Hanoi
 
         private static GameStateMatch FindMatch(GameState topMarker, GameState bottomMarker)
         {
+            if (topMarker.HasSamePegs(bottomMarker))
+            {
+                return new GameStateMatch(topMarker, bottomMarker);
+            }
+
             List<GameState> topTaboo = new List<GameState>();
             List<GameState> bottomTaboo = new List<GameState>();
 
             topTaboo.Add(topMarker);
+            topMarker.FindPossibilities(topTaboo);
+            topTaboo = topMarker.GetPossibilitiesUnion(topTaboo);
             bottomTaboo.Add(bottomMarker);
+            bottomMarker.FindPossibilities(bottomTaboo);
+            bottomTaboo = bottomMarker.GetPossibilitiesUnion(bottomTaboo);
 
-            //initial movement down and to rightmost edge of possibility group
-            topTaboo = topTaboo.Union(topMarker.FindPossibilities(topTaboo)).ToList();
-            GameState topRightmost = topMarker.Possibilities.ElementAtOrDefault(topMarker.Possibilities.Count - 1);
-            topMarker = topRightmost;
+            int searchTier = 0;
 
-            //bottom marker and it's rightmost initially stay at desired state and will always lag
-            //behind by one possibility group row
-            GameState bottomRightmost = bottomMarker;
-
-            //search loop
-            while (!topMarker.HasSamePegs(bottomMarker))
+            while (true)
             {
-                MoveInstruction topInstruction = MarkerMovement(topMarker, topRightmost, topTaboo);
-                topMarker = topInstruction.MainMarker;
-                topRightmost = topInstruction.RightmostMarker;
-                topTaboo = topInstruction.Taboo;
-                //if (topInstruction.TimeToMoveBottom)
-                //{
-                //    //bottom marker is not at left edge of it's possibility group row?
-                //    if (bottomMarker.PreviousPossibility != null || (bottomMarker.PreviousState != null && bottomMarker.PreviousState.PreviousPossibility != null))
-                //    {
-                //        //top marker returns to the rightmost edge of the possibility group row it just descended from
-                //        topMarker = topMarker.PreviousState;
-                //    }
-                //    MoveInstruction bottomInstruction = MarkerMovement(bottomMarker, bottomRightmost, bottomTaboo);
-                //    bottomMarker = bottomInstruction.MainMarker;
-                //    bottomRightmost = bottomInstruction.RightmostMarker;
-                //    bottomTaboo = bottomInstruction.Taboo;
-                //}
-            }
-
-            return new GameStateMatch(topMarker, bottomMarker);
-        }
-
-        private static MoveInstruction MarkerMovement(GameState marker, GameState rightmost, List<GameState> taboo)
-        {
-            //is main marker on leftmost edge of possibility group?
-            if (marker.PreviousPossibility == null)
-            {
-                //can main marker move up and left?
-                if (marker.PreviousState != null && marker.PreviousState.PreviousPossibility != null)
+                List<GameState> currentTierTop = topTaboo.Where(state => state.tier == searchTier).ToList();
+                List<GameState> currentTierBottom = bottomTaboo.Where(state => state.tier == searchTier).ToList();
+                for (var i=0; i<currentTierTop.Count; ++i)
                 {
-                    //move main marker up and left
-                    marker = marker.PreviousState.PreviousPossibility;
-                    //can main marker move down?
-                    if (marker.Possibilities.Count > 0)
+                    topMarker = currentTierTop.ElementAtOrDefault(i);
+                    for (var j = 0; j < currentTierBottom.Count; ++j)
                     {
-                        //move main marker down to rightmost edge of possibility group below
-                        marker = marker.Possibilities.ElementAtOrDefault(marker.Possibilities.Count - 1);
-                    }
-                }
-                //is main marker either blocked from moving upward, or is it's parent state on leftmost edge of possibility group?
-                else if (marker.PreviousState == null || marker.PreviousState.PreviousPossibility == null)
-                {
-                    //loop until rightmost marker can move down
-                    while (rightmost.Possibilities.Count < 1)
-                    {
-                        //is rightmost marker on leftmost edge of possibility group?
-                        if (rightmost.PreviousPossibility == null)
+                        bottomMarker = currentTierBottom.ElementAtOrDefault(j);
+                        if (topMarker.HasSamePegs(bottomMarker))
                         {
-                            //can rightmost marker move up and left?
-                            if (rightmost.PreviousState != null && rightmost.PreviousState.PreviousPossibility != null)
-                            {
-                                //move rightmost marker up and left
-                                rightmost = rightmost.PreviousState.PreviousPossibility;
-                            }
+                            return new GameStateMatch(topMarker, bottomMarker);
                         }
                         else
+
                         {
-                            //move rightmost marker left
-                            rightmost = rightmost.PreviousPossibility;
+                            bottomMarker.FindPossibilities(bottomTaboo);
+                            bottomTaboo = bottomMarker.GetPossibilitiesUnion(bottomTaboo);
                         }
                     }
-                    //move rightmost marker down to rightmost edge of possibility group below
-                    rightmost = rightmost.Possibilities.ElementAtOrDefault(rightmost.Possibilities.Count - 1);
-                    //move main marker to rightmost marker position
-                    marker = rightmost;
-                    //mark this position as visited
-                    taboo.Add(marker);
-                    //expand possibility group for this state
-                    marker.FindPossibilities(taboo);
-                    //if this is top marker then it's time to move bottom marker
-                    return new MoveInstruction(marker, rightmost, taboo, true);
+                    topMarker.FindPossibilities(topTaboo);
+                    topTaboo = topMarker.GetPossibilitiesUnion(topTaboo);
+                }
+                ++searchTier;
+            }
+        }
+
+        private List<GameState> GetPossibilitiesUnion(List<GameState> taboo)
+        {
+            foreach (var possibility in this.Possibilities)
+            {
+                if (!taboo.Contains(possibility))
+                {
+                    taboo.Add(possibility);
                 }
             }
-            else
-            {
-                //mark this position as visited
-                taboo.Add(marker);
-                //expand possibility group for this state
-                marker.FindPossibilities(taboo);
-                //move main marker left
-                marker = marker.PreviousPossibility;
-            }
-            //it is not yet time to move bottom marker
-            return new MoveInstruction(marker, rightmost, taboo, false);
+            return taboo;
         }
 
         public override bool Equals(object obj)

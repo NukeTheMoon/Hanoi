@@ -251,22 +251,6 @@ namespace HanoiTests
         }
 
         [Test]
-        public void FindPossibilities_EachPossibilityCorrectlyReferencesPreviousPossibilityInGroup()
-        {
-            GameState gs = new GameState();
-            gs.AddPegs(5);
-            gs.Pegs.ElementAt(0).PushDisc(new Disc(2, "blue"));
-            gs.Pegs.ElementAt(1).PushDisc(new Disc(2, "blue"));
-            gs.FindPossibilities();
-            for (var i = gs.Possibilities.Count - 1; i > 0; --i)
-            {
-                Assert.IsTrue
-                    (gs.Possibilities.ElementAtOrDefault(i).PreviousPossibility == 
-                    gs.Possibilities.ElementAtOrDefault(i - 1));
-            }
-        }
-
-        [Test]
         public void FindPossibilities_WillNotReturnAnyFromTaboo()
         {
             GameState gs = new GameState();
@@ -311,7 +295,8 @@ namespace HanoiTests
         }
 
         [Test]
-        public void GetSequence_ReturnsCorrectLength()
+        //[Ignore]
+        public void GetSequence_ReturnsCorrectLength5()
         {
             GameState initial = new GameState();
             initial.AddPegs(3);
@@ -334,7 +319,8 @@ namespace HanoiTests
         }
 
         [Test]
-        public void GetSequence_ReturnsCorrectLengthAlt()
+        //[Ignore]
+        public void GetSequence_ReturnsCorrectLength6()
         {
             GameState initial = new GameState();
             initial.AddPegs(3);
