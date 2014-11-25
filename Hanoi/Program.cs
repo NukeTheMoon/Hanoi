@@ -41,7 +41,7 @@ namespace Hanoi
             VisualizeSolution(initial, desired);
         }
 
-        static void Main(string[] args)
+        static void Main3(string[] args)
         {
             GameState initial = new GameState();
             initial.AddPegs(5);
