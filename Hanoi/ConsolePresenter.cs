@@ -103,9 +103,9 @@ namespace Hanoi
 
         private static void PresentPeg(Peg peg, ConsoleColor original)
         {
-            for (var i = peg.DiscCount - 1; i >= 0; --i)
+            for (var i = peg.GetDiscCount() - 1; i >= 0; --i)
             {
-                PresentDisc(peg.GetDiscList().ElementAt(i));
+                PresentDisc(peg.Stack.ElementAt(i));
             }
             Console.ForegroundColor = original;
             Console.Write('\n');

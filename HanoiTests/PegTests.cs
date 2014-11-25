@@ -1,156 +1,133 @@
-﻿using System.Linq;
-using Hanoi;
+﻿using Hanoi;
 using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace HanoiTests
 {
     [TestFixture]
     public class PegTests
     {
-        private Peg _sourcePeg;
-        private Peg _destinationPeg;
-
-        [SetUp]
-        public void SetUp()
-        {
-            _sourcePeg = new Peg();
-             _destinationPeg = new Peg();
-        }
-
-        private void PushDisksOnSourcePeg(string diskColor, params int[] diskSizes)
-        {
-            foreach (var diskSize in diskSizes)
-            {
-                PushDiscOnSourcePeg(diskSize, diskColor);
-            }            
-        }
-        private void PushDiscOnSourcePeg(int diskSize, string diskColor)
-        {
-            PushDiskOnPeg(_sourcePeg, diskSize, diskColor);
-        }
-        private void PushDiscOnDestinationPeg(int diskSize, string diskColor)
-        {
-            PushDiskOnPeg(_destinationPeg, diskSize, diskColor);
-        }
-        private void PushDiskOnPeg(Peg peg, int diskSize, string diskColor)
-        {
-            peg.TryPushDisc(new Disc(diskSize, diskColor));
-        }
-        private bool TryPushDiscOnSourcePeg(int diskSize, string diskColor)
-        {
-            return _sourcePeg.TryPushDisc(new Disc(diskSize, diskColor));
-        }
-        private bool MoveDiscBetweenPegs()
-        {
-            return _sourcePeg.MoveDisc(_destinationPeg);
-        }
-        private void AssertFirstDiskOnTopIs(int size, string color)
-        {
-            Assert.AreEqual(size, _sourcePeg.GetDiscList().First().Size);
-            Assert.AreEqual(color, _sourcePeg.GetDiscList().First().Color);
-        }
-
         [Test]
         public void PegInitializesWithDefaultCtor()
         {
-            Assert.IsNotNull(_sourcePeg);
+            Peg p = new Peg();
+            Assert.IsNotNull(p);
         }
 
         [Test]
         public void PegIsLegal_IllegalStack_ReturnsFalse()
         {
-            PushDisksOnSourcePeg("blue", 2, 1, 1, 3);
-            Assert.IsFalse(_sourcePeg.IsInLegalState());
+            Peg p = new Peg();
+            p.Stack.Push(new Disc(2, "blue"));
+            p.Stack.Push(new Disc(1, "blue"));
+            p.Stack.Push(new Disc(1, "blue"));
+            p.Stack.Push(new Disc(3, "blue"));
+            Assert.IsFalse(p.IsLegal());
         }
 
         [Test]
         public void PegIsLegal_LegalStack_ReturnsTrue()
         {
-            PushDisksOnSourcePeg("blue", 3, 2, 2, 1);
-            Assert.IsTrue(_sourcePeg.IsInLegalState());
+            Peg p = new Peg();
+            p.Stack.Push(new Disc(3, "blue"));
+            p.Stack.Push(new Disc(2, "blue"));
+            p.Stack.Push(new Disc(2, "blue"));
+            p.Stack.Push(new Disc(1, "blue"));
+            Assert.IsTrue(p.IsLegal());
         }
 
         [Test]
         public void PegClone_CloneHasSameStack()
         {
-            PushDiscOnSourcePeg(3, "red");
-            PushDiscOnSourcePeg(2, "yellow");
-            Peg clone = _sourcePeg.Clone() as Peg;
-            CollectionAssert.AreEqual(_sourcePeg.GetDiscList(), clone.GetDiscList());            
+            Peg p = new Peg();
+            Disc disc1 = new Disc(3, "red");
+            Disc disc2 = new Disc(2, "yellow");
+            p.Stack.Push(disc1);
+            p.Stack.Push(disc2);
+            Peg clone = p.Clone();
+            p.Stack.Clear();
+            disc1 = disc2 = null;
+            Assert.IsTrue(clone.Stack.ElementAtOrDefault(0).Size == 2 && clone.Stack.ElementAtOrDefault(0).Color == "yellow");
+            Assert.IsTrue(clone.Stack.ElementAtOrDefault(1).Size == 3 && clone.Stack.ElementAtOrDefault(1).Color == "red");
         }
 
         [Test]
         public void PegPushDisc_IllegalMove_ReturnsFalseAndRevertsToInitialStack()
         {
-            PushDiscOnSourcePeg(2, "orange");
-            Assert.IsFalse(TryPushDiscOnSourcePeg(3, "orange"));
-            Assert.AreEqual(1, _sourcePeg.DiscCount);
-            AssertFirstDiskOnTopIs(2, "orange");
+            Peg p = new Peg();
+            p.PushDisc(new Disc(2, "orange"));
+            Assert.IsFalse(p.PushDisc(new Disc(3, "orange")));
+            Assert.IsTrue(p.GetDiscCount() == 1);
+            Assert.IsTrue(p.Stack.Peek().Size == 2 && p.Stack.Peek().Color == "orange");
         }
 
         [Test]
         public void PegPushDisc_LegalMove_ReturnsTrue()
         {
-            PushDiscOnSourcePeg(2, "orange");
-            Assert.IsTrue(TryPushDiscOnSourcePeg(1, "yellow"));
+            Peg p = new Peg();
+            p.PushDisc(new Disc(2, "orange"));
+            Assert.IsTrue(p.PushDisc(new Disc(1, "yellow")));
         }
 
         [Test]
         public void PegPushDisc_LegalMove_StackIsModified()
         {
-            PushDiscOnSourcePeg(2, "orange");
-            PushDiscOnSourcePeg(1, "yellow");
-            Assert.AreEqual(2, _sourcePeg.DiscCount);
-            AssertFirstDiskOnTopIs(1, "yellow");
+            Peg p = new Peg();
+            p.PushDisc(new Disc(2, "orange"));
+            p.PushDisc(new Disc(1, "yellow"));
+            Assert.IsTrue(p.GetDiscCount() == 2 && 
+                p.Stack.Peek().Size == 1 
+                && p.Stack.Peek().Color == "yellow");
         }
 
         [Test]
         public void PegMoveDisc_LegalMove_ReturnsTrue()
         {
-            PushDiscOnSourcePeg(2, "orange");
-            PushDiscOnSourcePeg(1, "yellow");
-            Assert.IsTrue(_sourcePeg.MoveDisc(_destinationPeg));
+            Peg origin = new Peg();
+            origin.PushDisc(new Disc(2, "orange"));
+            origin.PushDisc(new Disc(1, "yellow"));
+            Peg dest = new Peg();
+            Assert.IsTrue(origin.MoveDisc(dest));
         }
 
         [Test]
         public void PegMoveDisc_IllegalMove_ReturnsFalse()
         {
-            PushDiscOnSourcePeg(3, "orange");
-            PushDiscOnSourcePeg(2, "yellow");
-            PushDiscOnDestinationPeg(1, "yellow");
-            Assert.IsFalse(MoveDiscBetweenPegs());
+            Peg origin = new Peg();
+            origin.PushDisc(new Disc(3, "orange"));
+            origin.PushDisc(new Disc(2, "yellow"));
+            Peg dest = new Peg();
+            dest.PushDisc(new Disc(1, "yellow"));
+            Assert.IsFalse(origin.MoveDisc(dest));
         }
 
         [Test]
         public void PegMoveDisc_IllegalMove_OriginUnaltered()
         {
-            PushDiscOnSourcePeg(3, "orange");
-            PushDiscOnSourcePeg(2, "yellow");
-            Peg originOriginal = _sourcePeg.Clone() as Peg;
-            PushDiscOnDestinationPeg(1, "yellow");
-            MoveDiscBetweenPegs();
-            Assert.AreEqual(_sourcePeg, originOriginal);
+            Peg origin = new Peg();
+            origin.PushDisc(new Disc(3, "orange"));
+            origin.PushDisc(new Disc(2, "yellow"));
+            Peg originOriginal = origin.Clone();
+            Peg dest = new Peg();
+            dest.PushDisc(new Disc(1, "yellow"));
+            origin.MoveDisc(dest);
+            Assert.IsTrue(origin.Equals(originOriginal));
         }
 
         [Test]
         public void PegMoveDisc_IllegalMove_DestinationUnaltered()
         {
-            PushDiscOnSourcePeg(3, "orange");
-            PushDiscOnSourcePeg(2, "yellow");
-            PushDiscOnDestinationPeg(1, "yellow");
-            Peg destOriginal = _destinationPeg.Clone() as Peg;
-            MoveDiscBetweenPegs();
-            Assert.AreNotEqual(_sourcePeg, destOriginal);
-        }
-
-        [Test]
-        public void PegGetDiscList_ReturnsElementsInStackOrder()
-        {
-            PushDiscOnSourcePeg(3, "orange");
-            PushDiscOnSourcePeg(2, "yellow");
-            PushDiscOnSourcePeg(1, "orange");
-            var list = _sourcePeg.GetDiscList();
-            CollectionAssert.AreEqual(_sourcePeg.GetDiscList(), list);
+            Peg origin = new Peg();
+            origin.PushDisc(new Disc(3, "orange"));
+            origin.PushDisc(new Disc(2, "yellow"));
+            Peg dest = new Peg();
+            dest.PushDisc(new Disc(1, "yellow"));
+            Peg destOriginal = dest.Clone();
+            origin.MoveDisc(dest);
+            Assert.IsTrue(dest.Equals(destOriginal));
         }
     }
 }
