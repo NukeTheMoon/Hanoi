@@ -9,7 +9,7 @@ namespace Hanoi
 {
     class Program
     {
-        static void Main1(string[] args)
+        static void Main(string[] args)
         {
             Console.WriteLine("Universal Hanoi Problem Solver");
             Console.WriteLine("Bartosz Jedrasik");
@@ -41,7 +41,7 @@ namespace Hanoi
             VisualizeSolution(initial, desired);
         }
 
-        static void Main(string[] args)
+        static void Main3(string[] args)
         {
             GameState initial = new GameState();
             initial.AddPegs(10);
@@ -86,6 +86,7 @@ namespace Hanoi
             Console.WriteLine("\nReady?");
             Console.ReadKey(true);
 
+            Console.WriteLine("Calculating...");
             string solution = GameState.GetSequence(visualization, desired);
             int pegNoDigits = (int)Math.Floor(Math.Log10(visualization.Pegs.Count) + 1);
             int a = pegNoDigits - 1, b = a + 2, moveCounter = 0;
