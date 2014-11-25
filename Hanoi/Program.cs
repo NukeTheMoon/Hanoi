@@ -9,7 +9,7 @@ namespace Hanoi
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main1(string[] args)
         {
             Console.WriteLine("Universal Hanoi Problem Solver");
             Console.WriteLine("Bartosz Jedrasik");
@@ -41,35 +41,29 @@ namespace Hanoi
             VisualizeSolution(initial, desired);
         }
 
-        static void Main3(string[] args)
+        static void Main(string[] args)
         {
             GameState initial = new GameState();
-            initial.AddPegs(10);
-            initial.Pegs.ElementAtOrDefault(0).PushDisc(new Disc(12, "blue"));
-            initial.Pegs.ElementAtOrDefault(0).PushDisc(new Disc(11, "cyan"));
-            initial.Pegs.ElementAtOrDefault(0).PushDisc(new Disc(11, "red"));
-            initial.Pegs.ElementAtOrDefault(0).PushDisc(new Disc(9, "red"));
-            initial.Pegs.ElementAtOrDefault(0).PushDisc(new Disc(8, "white"));
-            initial.Pegs.ElementAtOrDefault(0).PushDisc(new Disc(6, "blue"));
-            initial.Pegs.ElementAtOrDefault(0).PushDisc(new Disc(5, "blue"));
-            initial.Pegs.ElementAtOrDefault(0).PushDisc(new Disc(4, "red"));
-            initial.Pegs.ElementAtOrDefault(0).PushDisc(new Disc(3, "magenta"));
-            initial.Pegs.ElementAtOrDefault(0).PushDisc(new Disc(2, "yellow"));
-            initial.Pegs.ElementAtOrDefault(0).PushDisc(new Disc(1, "yellow"));
+            initial.AddPegs(5);
+            initial.Pegs.ElementAtOrDefault(3).PushDisc(new Disc(12, "blue"));
+            initial.Pegs.ElementAtOrDefault(4).PushDisc(new Disc(11, "red"));
+            initial.Pegs.ElementAtOrDefault(4).PushDisc(new Disc(9, "red"));
+            initial.Pegs.ElementAtOrDefault(3).PushDisc(new Disc(6, "blue"));
+            initial.Pegs.ElementAtOrDefault(3).PushDisc(new Disc(5, "blue"));
+            initial.Pegs.ElementAtOrDefault(4).PushDisc(new Disc(4, "red"));
+            initial.Pegs.ElementAtOrDefault(2).PushDisc(new Disc(2, "yellow"));
+            initial.Pegs.ElementAtOrDefault(2).PushDisc(new Disc(1, "yellow"));
 
             GameState desired = new GameState();
-            desired.AddPegs(10);
-            desired.Pegs.ElementAtOrDefault(3).PushDisc(new Disc(12, "blue"));
-            desired.Pegs.ElementAtOrDefault(4).PushDisc(new Disc(11, "cyan"));
-            desired.Pegs.ElementAtOrDefault(0).PushDisc(new Disc(11, "red"));
-            desired.Pegs.ElementAtOrDefault(0).PushDisc(new Disc(9, "red"));
-            desired.Pegs.ElementAtOrDefault(1).PushDisc(new Disc(8, "white"));
-            desired.Pegs.ElementAtOrDefault(3).PushDisc(new Disc(6, "blue"));
-            desired.Pegs.ElementAtOrDefault(3).PushDisc(new Disc(5, "blue"));
-            desired.Pegs.ElementAtOrDefault(0).PushDisc(new Disc(4, "red"));
-            desired.Pegs.ElementAtOrDefault(4).PushDisc(new Disc(3, "magenta"));
-            desired.Pegs.ElementAtOrDefault(2).PushDisc(new Disc(2, "yellow"));
-            desired.Pegs.ElementAtOrDefault(2).PushDisc(new Disc(1, "yellow"));
+            desired.AddPegs(5);
+            desired.Pegs.ElementAtOrDefault(1).PushDisc(new Disc(12, "blue"));
+            desired.Pegs.ElementAtOrDefault(2).PushDisc(new Disc(11, "red"));
+            desired.Pegs.ElementAtOrDefault(2).PushDisc(new Disc(9, "red"));
+            desired.Pegs.ElementAtOrDefault(1).PushDisc(new Disc(6, "blue"));
+            desired.Pegs.ElementAtOrDefault(1).PushDisc(new Disc(5, "blue"));
+            desired.Pegs.ElementAtOrDefault(2).PushDisc(new Disc(4, "red"));
+            desired.Pegs.ElementAtOrDefault(3).PushDisc(new Disc(2, "yellow"));
+            desired.Pegs.ElementAtOrDefault(3).PushDisc(new Disc(1, "yellow"));
 
             VisualizeSolution(initial, desired);
         }

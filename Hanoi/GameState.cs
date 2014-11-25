@@ -43,8 +43,8 @@ namespace Hanoi
             }
             else
             {
-                PreviousState = previous;
-                tier = previous.tier + 1;
+                            PreviousState = previous;
+            tier = previous.tier + 1;
             }
             Possibilities = new List<GameState>();
             Transition = "";
@@ -263,8 +263,11 @@ namespace Hanoi
             }
         }
 
-        private static GameStateMatch FindMatch(GameState topMarker, GameState bottomMarker)
+        private static GameStateMatch FindMatch(GameState origin, GameState desired)
         {
+            GameState topMarker = new GameState(origin, true);
+            GameState bottomMarker = new GameState(desired, true);
+
             if (topMarker.HasSamePegs(bottomMarker))
             {
                 return new GameStateMatch(topMarker, bottomMarker);
